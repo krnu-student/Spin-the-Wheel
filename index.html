@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Колесо натхнення</title>
+<meta name="description" content="Крутни колесо й отримай запитання, з якого можна почати заняття.">
+<meta name="theme-color" content="#f7c27a">
+<meta property="og:title" content="Колесо натхнення">
+<meta property="og:description" content="Крутни колесо й отримай запитання, з якого можна почати заняття.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+:root{
+  --sky-top:#f7c27a; --sky-bot:#fdecd2; --g1:#cf6a1f; --g2:#a24d1a; --g3:#e5a53a;
+  --ink:#4a2410; --ink-soft:#7a4526; --card:#fff8ecee; --btn:#b3471a; --btn-ink:#fff; --chip:#fde0b0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --sky-top:#2b1510; --sky-bot:#6a3a22; --g1:#7a3a14; --g2:#5a2a10; --g3:#8f5a1c;
+    --ink:#ffeedb; --ink-soft:#e8c9a4; --card:#3a2016ee; --btn:#f0a24a; --btn-ink:#2a1405; --chip:#5a3322;
+  }
+}
+:root[data-theme="dark"]{
+  --sky-top:#2b1510; --sky-bot:#6a3a22; --g1:#7a3a14; --g2:#5a2a10; --g3:#8f5a1c;
+  --ink:#ffeedb; --ink-soft:#e8c9a4; --card:#3a2016ee; --btn:#f0a24a; --btn-ink:#2a1405; --chip:#5a3322;
+}
+html{height:100%}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100%; color:var(--ink);
+  font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(ellipse 60% 22% at 12% 100%, var(--g1) 0 60%, transparent 61%),
+    radial-gradient(ellipse 55% 18% at 88% 100%, var(--g2) 0 60%, transparent 61%),
+    radial-gradient(ellipse 90% 12% at 50% 104%, var(--g3) 0 60%, transparent 61%),
+    linear-gradient(180deg,var(--sky-top),var(--sky-bot));
+  background-attachment:fixed;
+}
+main{max-width:900px; margin:0 auto; padding:28px 16px 56px; text-align:center}
+h1{margin:0; font-size:clamp(2rem,6vw,3.4rem); letter-spacing:.01em; font-weight:800}
+.lead{margin:10px auto 0; max-width:34em; color:var(--ink-soft); font-size:clamp(1rem,2.6vw,1.15rem); line-height:1.45}
+
+.stage{position:relative; width:min(88vw,720px); margin:26px auto 0}
+.stage canvas{display:block; width:100%; height:auto; border-radius:50%;
+  transition:transform 5.2s cubic-bezier(.12,.7,.1,1); will-change:transform;
+  filter:drop-shadow(0 14px 22px rgba(20,40,110,.28))}
+.pointer{position:absolute; left:-6.5%; top:50%; width:10%; transform:translateY(-50%); z-index:2;
+  filter:drop-shadow(0 3px 4px rgba(10,20,80,.35))}
+.leaves{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0}
+.leaf{position:absolute; top:-8vh; animation:fall linear infinite; opacity:.85}
+@keyframes fall{to{transform:translate(var(--dx),112vh) rotate(var(--rot))}}
+main{position:relative; z-index:1; overflow-x:clip}
+@media (prefers-reduced-motion:reduce){.leaf{display:none}}
+
+button.spin{
+  margin-top:24px; font:inherit; font-size:1.25rem; font-weight:700; cursor:pointer;
+  padding:14px 44px; border-radius:10px; border:2px solid var(--btn);
+  background:var(--btn); color:var(--btn-ink);
+  box-shadow:0 6px 0 rgba(10,20,80,.25); transition:transform .1s, box-shadow .1s;
+}
+button.spin:hover{transform:translateY(1px); box-shadow:0 5px 0 rgba(10,20,80,.25)}
+button.spin:active{transform:translateY(5px); box-shadow:0 1px 0 rgba(10,20,80,.25)}
+button.spin:disabled{opacity:.6; cursor:default}
+button.spin:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+
+.result{
+  margin:28px auto 0; max-width:640px; padding:22px 24px; border-radius:18px;
+  background:var(--card); text-align:left; box-shadow:0 10px 30px rgba(20,40,110,.22);
+}
+.result[hidden]{display:none}
+.chip{display:inline-block; padding:4px 12px; border-radius:99px; background:var(--chip);
+  font-size:.9rem; font-weight:600; color:var(--ink-soft)}
+.question{margin:12px 0 0; font-size:clamp(1.2rem,3.4vw,1.55rem); line-height:1.4; font-weight:600}
+.again{margin:14px 0 0; color:var(--ink-soft); font-size:.95rem}
+@media (prefers-reduced-motion:reduce){.stage canvas{transition-duration:.01s}}
+button.spin{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
+.legend{display:none}
+@media (max-width:600px){
+  main{padding:20px 12px 44px}
+  .lead{font-size:1rem}
+  button.spin{width:100%; max-width:360px; padding:16px 20px; font-size:1.2rem; margin-top:20px}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:center; margin:18px 0 0; font-size:.9rem; color:var(--ink-soft)}
+  .result{padding:18px; margin-top:22px; border-radius:16px}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Колесо натхнення</h1>
+  <p class="lead">Крутни колесо й отримай запитання, з якого можна почати заняття.</p>
+
+  <div class="stage">
+    <svg class="pointer" viewBox="0 0 100 70" aria-hidden="true">
+      <path d="M4 22h46V4l46 31-46 31V48H4z" fill="#b3261e" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+    </svg>
+    <canvas id="wheel" width="1400" height="1400" role="img" aria-label="Колесо із запитаннями"></canvas>
+  </div>
+
+  <p class="legend"><span>🔋 Енергія та настрій</span><span>😂 Гумор та несподіванки</span><span>🚀 Крок уперед</span></p>
+
+  <button class="spin" id="spin" type="button">Крутити</button>
+
+  <section class="result" id="result" hidden aria-live="polite">
+    <span class="chip" id="cat"></span>
+    <p class="question" id="q"></p>
+    <p class="again">Хочеш інше запитання? Крутни ще раз.</p>
+  </section>
+</main>
+
+<script>
+const GROUPS = [
+  {name:"🔋 Енергія та настрій", items:[
+    "Якби можна було натиснути одну кнопку перед заняттям, що б ти обрав/обрала: «Додати енергії», «Увімкнути креативність» чи «Вимкнути втому»?",
+    "Яку думку ти сьогодні хочеш залишити за межами цифрового хабу?",
+    "Який відсоток твоєї батарейки зараз? І що допоможе зарядитися до 100%?",
+    "Якби твій настрій був застосунком, яку функцію потрібно було б оновити?",
+    "Який режим сьогодні активуємо: «Творю», «Досліджую», «Надихаюся» чи «Дивуюся»?",
+    "Що сьогодні може розбудити в тобі внутрішнього суперучителя?"]},
+  {name:"😂 Трохи гумору та несподіванок", items:[
+    "Якби твої учні сьогодні могли прочитати твої думки, що б вони там побачили?",
+    "Яке повідомлення ти хотів/хотіла б отримати від Всесвіту перед початком заняття?",
+    "Якби твій сьогоднішній настрій був мемом, що б на ньому було зображено?",
+    "Який предмет або цифровий інструмент міг би стати твоїм помічником-супергероєм?",
+    "Якби за сьогоднішню активність давали педагогічні бонуси, за що ти отримав/отримала б найбільше?",
+    "Яке слово найкраще описує твій стан, коли чуєш: «А зараз буде цікаве практичне завдання!»?"]},
+  {name:"🚀 Крок уперед", items:[
+    "Яку одну річ ти сьогодні готовий/готова зробити вперше?",
+    "Яку педагогічну звичку ти хотів/хотіла б прокачати?",
+    "Якби сьогодні тобі подарували одну нову цифрову навичку, що б ти обрав/обрала?",
+    "Який свій страх щодо цифрових технологій ти готовий/готова сьогодні перетворити на цікавість?",
+    "Яку ідею ти давно відкладаєш, але сьогодні можеш зробити перший крок до її реалізації?"]}
+];
+const SEGS = GROUPS.flatMap(g => g.items.map(t => ({t, cat:g.name})));
+const N = SEGS.length, SEG = 360 / N;
+const COLORS = ["#2f6b57","#3a5fa8","#a8473a"], HILITE = "#f2c230"; /* дошка, зошит, цегла */
+
+const cv = document.getElementById("wheel"), ctx = cv.getContext("2d");
+const C = cv.width / 2, R_RING = C - 6, R_SEG = C - 56, T_OUT = R_SEG - 26, T_MAXW = 385;
+const FONT = s => `600 ${s}px "Segoe UI",Roboto,Arial,sans-serif`;
+
+function wrap(text, size){
+  ctx.font = FONT(size);
+  const words = text.split(" "), lines = []; let cur = "";
+  for (const w of words){
+    const test = cur ? cur + " " + w : w;
+    if (ctx.measureText(test).width > T_MAXW && cur){ lines.push(cur); cur = w; } else cur = test;
+  }
+  lines.push(cur); return lines;
+}
+
+let lastHi = -1;
+function draw(hi = -1){
+  lastHi = hi;
+  const small = cv.clientWidth < 560;      /* на телефоні замість тексту — значок групи */
+  const icon = i => {
+    const an = (i + .5) * SEG * Math.PI / 180;
+    ctx.font = '66px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#fff";
+    ctx.fillText(SEGS[i].cat.split(" ")[0], C + Math.cos(an) * 440, C + Math.sin(an) * 440);
+  };
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.beginPath(); ctx.arc(C,C,R_RING,0,Math.PI*2); ctx.fillStyle = "#f2cf6b"; ctx.fill();
+  ctx.lineWidth = 4; ctx.strokeStyle = "#a77a1c"; ctx.stroke();
+  for (let k = 0; k < 170; k++){            /* лінійка по колу */
+    const an = k * Math.PI * 2 / 170, len = k % 10 === 0 ? 30 : k % 5 === 0 ? 22 : 14;
+    ctx.beginPath();
+    ctx.moveTo(C + Math.cos(an) * (R_RING - 4), C + Math.sin(an) * (R_RING - 4));
+    ctx.lineTo(C + Math.cos(an) * (R_RING - 4 - len), C + Math.sin(an) * (R_RING - 4 - len));
+    ctx.lineWidth = 3; ctx.strokeStyle = "#6b4a10"; ctx.stroke();
+  }
+  for (let i = 0; i < N; i++){
+    const a0 = i*SEG*Math.PI/180, a1 = (i+1)*SEG*Math.PI/180;
+    ctx.beginPath(); ctx.moveTo(C,C); ctx.arc(C,C,R_SEG,a0,a1); ctx.closePath();
+    ctx.fillStyle = i === hi ? HILITE : COLORS[i % 3]; ctx.fill();
+    ctx.lineWidth = 5; ctx.strokeStyle = "#fff"; ctx.stroke();
+  }
+  for (let i = 0; i < N; i++){
+    if (small){ icon(i); continue; }
+    let size = 27, txt = SEGS[i].t, lines = wrap(txt, size);
+    while (lines.length > 4 && size > 22){ size -= 1; lines = wrap(txt, size); }
+    if (lines.length > 4){ const w = txt.split(" "); while (lines.length > 4 && w.length){ w.pop(); txt = w.join(" ") + "…"; lines = wrap(txt, size); } }
+    const lh = size * 1.18;
+    ctx.save();
+    ctx.translate(C,C); ctx.rotate((i+.5)*SEG*Math.PI/180 + Math.PI);
+    ctx.fillStyle = i === hi ? "#2a1a05" : "#fff"; ctx.font = FONT(size); ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    lines.forEach((l,k) => ctx.fillText(l, -T_OUT, (k - (lines.length-1)/2) * lh));
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(C,C,98,0,Math.PI*2); ctx.fillStyle = "#f2cf6b"; ctx.fill();
+  ctx.lineWidth = 8; ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.font = '82px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#000"; ctx.fillText("🎓", C, C + 6);
+}
+draw();
+addEventListener("resize", () => draw(lastHi));
+
+const btn = document.getElementById("spin"), box = document.getElementById("result");
+let rot = 0, busy = false;
+
+function show(i){
+  draw(i);
+  document.getElementById("cat").textContent = SEGS[i].cat;
+  document.getElementById("q").textContent = SEGS[i].t;
+  box.hidden = false;
+  box.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+btn.addEventListener("click", () => {
+  if (busy) return; busy = true; btn.disabled = true; draw();
+  const w = Math.floor(Math.random() * N);
+  const a = (w + .5 + (Math.random() - .5) * .7) * SEG;           // point inside segment w
+  const target = ((180 - a) % 360 + 360) % 360;                   // pointer sits at 180°
+  const delta = ((target - rot) % 360 + 360) % 360;
+  rot += 360 * 6 + delta;
+  cv.style.transform = `rotate(${rot}deg)`;
+  const done = () => {
+    cv.removeEventListener("transitionend", done);
+    const idx = Math.floor((((180 - rot) % 360) + 360) % 360 / SEG) % N;
+    show(idx); busy = false; btn.disabled = false;
+  };
+  cv.addEventListener("transitionend", done);
+});
+(function(){ /* осіннє листя */
+  const L = ["🍁","🍂","🍂","🍁","🍃"], wrap = document.createElement("div");
+  wrap.className = "leaves"; wrap.setAttribute("aria-hidden","true"); document.body.appendChild(wrap);
+  const cnt = matchMedia("(max-width:600px)").matches ? 8 : 16;
+  for (let i = 0; i < cnt; i++){
+    const s = document.createElement("span"); s.className = "leaf"; s.textContent = L[i % L.length];
+    s.setAttribute("aria-hidden","true");
+    s.style.left = Math.random()*100 + "vw"; s.style.fontSize = (18 + Math.random()*20) + "px";
+    s.style.animationDuration = (9 + Math.random()*9) + "s"; s.style.animationDelay = (-Math.random()*14) + "s";
+    s.style.setProperty("--dx", (Math.random()*18 - 9) + "vw"); s.style.setProperty("--rot", (Math.random()*720 - 360) + "deg");
+    wrap.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
